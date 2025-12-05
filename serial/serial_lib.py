@@ -25,7 +25,7 @@ class SerialLib(Utils):
             self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
             self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
             self.read()
-            self.command()
+            self.send_command()
 
         except Exception as Ex:
             self.log(Ex)
@@ -85,8 +85,9 @@ class SerialLib(Utils):
         """
         This function sends a command to the serial module.
         """
-        try:
-            command = input("Enter command to send: ")
-            self.write(command + "\n")
-        except:
-            self.log("Error sending command")
+        while True:
+            try:
+                command = input("Enter command to send: ")
+                self.write(command + "\n")
+            except:
+                self.log("Error sending command")
