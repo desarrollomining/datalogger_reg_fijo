@@ -1,0 +1,12 @@
+{
+  "SERVER": {
+    "IP": "127.0.0.1",
+    "PORT": 20001,
+    "MAX_LEN_PACKET_DATA": 60,
+    "SECONDS_MICRODATA": 1
+  },
+  "SENSOR": {
+    "PORT": 5,
+    "LEVEL_CURVE": [0, 0]
+  }
+}
