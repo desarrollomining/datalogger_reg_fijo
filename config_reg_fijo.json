@@ -6,7 +6,7 @@
     "SECONDS_MICRODATA": 1
   },
   "SENSOR": {
-    "PORT": 5,
+    "PORT": 3,
     "LEVEL_CURVE": [0, 0]
   }
 }
