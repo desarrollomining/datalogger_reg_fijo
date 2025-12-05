@@ -23,7 +23,7 @@ class SerialLib(Utils):
 
         try:
             self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
-            self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate_read, timeout=self.timeout)
+            self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
             self.read()
             self.command()
 
