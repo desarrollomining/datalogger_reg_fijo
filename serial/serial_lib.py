@@ -5,8 +5,8 @@ from time import time, sleep
 from lib.utils import Utils
 
 class SerialLib(Utils):
-    def __init__(self, usbdevnode, level_curve, baudrate: int = 9600, log_id = "SERIAL"):
-        self.baudrate = baudrate
+    def __init__(self, usbdevnode, level_curve, baudrate_read: int = 9600, baudrate_write: int = 115200, log_id = "SERIAL"):
+        self.baudrate_read = baudrate_read
         self.timeout = 0.5
         self.log_id = log_id
         self.usbdevnode = usbdevnode
@@ -23,8 +23,9 @@ class SerialLib(Utils):
 
         try:
             self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
-            self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
+            self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate_read, timeout=self.timeout)
             self.read()
+            self.command()
 
         except Exception as Ex:
             self.log(Ex)

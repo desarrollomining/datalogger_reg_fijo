@@ -11,13 +11,13 @@ f = open('/srv/datalogger_reg_fijo/config_reg_fijo.json')
 config:dict = json.load(f)
 
 # Global variables
-USB_SERIAL_VALVE = config["SENSOR"]["PORT"]
+USB_SERIAL_SENSOR = config["SENSOR"]["PORT"]
 CALIBRATION_LEVEL_CURVE = config["SENSOR"]["LEVEL_CURVE"] # Lista con min and max voltage signal: [v_min, v_max]
 SERVER_IP = config["SERVER"]["IP"]
 SERVER_PORT = config["SERVER"]["PORT"]
 
 if __name__ == "__main__":
-    devnode = USBDevnode(USB_SERIAL_VALVE)
+    devnode = USBDevnode(USB_SERIAL_SENSOR)
     RX = SerialLib(devnode, level_curve= CALIBRATION_LEVEL_CURVE, log_id="SERIAL")
     RX.set_server(SERVER_IP, SERVER_PORT)
     RX.set_panic_command("systemctl restart mining-serial")
@@ -29,6 +29,6 @@ if __name__ == "__main__":
         silence_period = time.time() - RX.last_timestamp
         if int(silence_period) > 20:
             RX.panic("Too much RX silence")
-        print("last_valve_timestamp: %s" % str(silence_period))
+        print("last_sensor_timestamp: %s" % str(silence_period))
         time.sleep(1)
 
