@@ -21,14 +21,15 @@ class SerialLib(Utils):
         This function attempts to establish a serial connection with the specified USB device node.
 
         """
+        while True:
+            try:
+                self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
+                self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
+                self.read()
 
-        try:
-            self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
-            self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
-            self.read()
-
-        except Exception as Ex:
-            self.log(Ex)
+            except Exception as Ex:
+                self.log(Ex)
+                sleep(2)
 
     def connect_write(self) -> None:
         """
@@ -62,7 +63,12 @@ class SerialLib(Utils):
                     if "modo" in line:self.process_line(line)
                 sleep(0.01)
             except:
-                self.log("Error decoding line")
+                self.log("Error decoding line, trying to reconect...")
+                try: 
+                    self.serial_module.close()
+                except:
+                    self.log("Error closing serial")
+                return
 
     def process_line(self, line: str) -> None:
         """
@@ -82,26 +88,15 @@ class SerialLib(Utils):
                 
         except:
             self.traceback() 
-
-    def write(self, command: str) -> None:
-        """
-        This function writes a command to the serial module.
-
-        :param command: The command to be written to the serial module.
-        """
-        try:
-            self.serial_module.write(command.encode('utf-8'))
-            self.log(f"Written command: {command}")
-        except:
-            self.log("Error writing command to serial")
         
-    def send_command(self) -> None:
+    def write_command(self) -> None:
         """
         This function sends a command to the serial module.
         """
         while True:
             try:
                 command = input("Enter command to send: ")
-                self.write(command + "\n")
+                self.serial_module.write(command.encode('utf-8'))
             except:
-                self.log("Error sending command")
+                self.log("Error writing command") 
+                
