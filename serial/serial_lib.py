@@ -8,6 +8,7 @@ class SerialLib(Utils):
     def __init__(self, usbdevnode, level_curve, baudrate: int = 9600, log_id = "SERIAL"):
         self.baudrate = baudrate
         self.timeout = 0.5
+        self.log_id = log_id
         self.usbdevnode = usbdevnode
         self.v_min, self.v_max = level_curve
         self.last_timestamp = time()
