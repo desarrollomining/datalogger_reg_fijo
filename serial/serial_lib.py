@@ -13,9 +13,10 @@ class SerialLib(Utils):
         self.v_min, self.v_max = level_curve
         self.last_timestamp = time()
 
-        threading.Thread(target=self.connect).start()
+        threading.Thread(target=self.connect_read).start()
+        threading.Thread(target=self.connect_write).start()
     
-    def connect(self) -> None:
+    def connect_read(self) -> None:
         """
         This function attempts to establish a serial connection with the specified USB device node.
 
@@ -25,6 +26,19 @@ class SerialLib(Utils):
             self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
             self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
             self.read()
+
+        except Exception as Ex:
+            self.log(Ex)
+
+    def connect_write(self) -> None:
+        """
+        This function attempts to establish a serial connection with the specified USB device node.
+
+        """
+
+        try:
+            self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
+            self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
             self.send_command()
 
         except Exception as Ex:
