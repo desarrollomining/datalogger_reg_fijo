@@ -1,102 +1,97 @@
 import threading
-import json
-from serial import Serial, serialutil
-from time import time, sleep
+from serial import Serial, SerialException
+from time import sleep
+from queue import Queue, Empty
 from lib.utils import Utils
+from time import time, sleep
 
 class SerialLib(Utils):
-    def __init__(self, usbdevnode, level_curve, baudrate: int = 115200, log_id = "SERIAL"):
+    def __init__(self, usbdevnode, level_curve, baudrate=115200, log_id="SERIAL"):
+        self.usbdevnode = usbdevnode
         self.baudrate = baudrate
         self.timeout = 0.5
         self.log_id = log_id
-        self.usbdevnode = usbdevnode
         self.v_min, self.v_max = level_curve
         self.last_timestamp = time()
 
-        threading.Thread(target=self.connect_read).start()
-        threading.Thread(target=self.connect_write).start()
-    
-    def connect_read(self) -> None:
-        """
-        This function attempts to establish a serial connection with the specified USB device node.
+        self.serial = None
+        self.running = threading.Event()
+        self.running.set()
 
-        """
-        while True:
+        self.tx_queue = Queue()
+
+        self._connect()
+
+        self.read_thread = threading.Thread(target=self._read_loop, daemon=True)
+        self.write_thread = threading.Thread(target=self._write_loop, daemon=True)
+
+        self.read_thread.start()
+        self.write_thread.start()
+
+    def _connect(self):
+        while self.running.is_set():
             try:
-                self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
-                self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
-                self.read()
-
-            except Exception as Ex:
-                self.log(Ex)
+                dev = self.usbdevnode.get_devnode()
+                self.log(f"Connecting to serial port: {dev}")
+                self.serial = Serial(dev, self.baudrate, timeout=self.timeout)
+                self.log("Serial connected")
+                return
+            except SerialException as e:
+                self.log(f"Connection error: {e}")
                 sleep(2)
 
-    def connect_write(self) -> None:
-        """
-        This function attempts to establish a serial connection with the specified USB device node.
-
-        """
-
-        try:
-            self.log(f"Try to connect serial port: {self.usbdevnode.get_devnode()}")
-            self.serial_module = Serial(self.usbdevnode.get_devnode(), self.baudrate, timeout=self.timeout)
-            self.write_command()
-
-        except Exception as Ex:
-            self.log(Ex)
-
-    def read(self) -> None:
-        """
-        This function continuously reads lines from the serial module and processes them.
-        If the line is empty, the function skips it.
-
-        """
-        self.log("Reading line from serial")
-        while True:
+    def _read_loop(self):
+        while self.running.is_set():
             try:
-                raw_line = self.serial_module.readline().decode("utf-8")
-                line = raw_line.strip()
-                if line =="":
-                    pass
-                else:
-                    self.log(f"GOT: {line}")
-                    if "modo" in line:self.process_line(line)
-                sleep(0.01)
-            except:
-                self.log("Error decoding line, trying to reconect...")
-                try: 
-                    self.serial_module.close()
-                except:
-                    self.log("Error closing serial")
-                return
+                line = self.serial.readline().decode("utf-8", errors="ignore").strip()
+                if not line:
+                    continue
+                
+                self.last_timestamp = time() 
+                self.log(f"GOT: {line}")
 
-    def process_line(self, line: str) -> None:
-        """
-        This function processes a line of data received from the serial module.
-        It extracts the sensor level and computes the corresponding voltage.
+                if "modo" in line.lower():
+                    self.process_line(line)
 
-        :param line: The line of data received from the serial module.
-        """
+            except SerialException as e:
+                self.log(f"Read error: {e}")
+                self._reconnect()
+
+    def _write_loop(self):
+        while self.running.is_set():
+            try:
+                command = self.tx_queue.get(timeout=0.5)
+                self.serial.write(command.encode("utf-8"))
+                self.log(f"SENT: {command}")
+            except Empty:
+                continue
+            except SerialException as e:
+                self.log(f"Write error: {e}")
+                self._reconnect()
+
+    def send_command(self, command: str):
+        self.tx_queue.put(command)
+
+    def process_line(self, line: str):
         try:
-            # 1. Process data 
-            data_dict = {}
-            data_split = line.split(';')
+            data_split = line.split(";")
             for data in data_split:
-                if not data: continue
-                data = data.upper()
-                self.log(f"Data: {data}")
-                
-        except:
-            self.traceback() 
-        
-    def write_command(self) -> None:
-        """
-        This function sends a command to the serial module.
-        """
-        while True:
-            try:
-                command = input("Enter command to send: ")
-                self.serial_module.write(command.encode('utf-8'))
-            except:
-                self.log("Error writing command") 
-                
+                if not data:
+                    continue
+                self.log(f"Data: {data.upper()}")
+        except Exception:
+            self.traceback()
+
+    def _reconnect(self):
+        try:
+            if self.serial:
+                self.serial.close()
+        except Exception:
+            pass
+
+        self._connect()
+
+    def stop(self):
+        self.running.clear()
+        if self.serial:
+            self.serial.close()

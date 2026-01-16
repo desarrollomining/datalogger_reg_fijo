@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 User=root
-ExecStart=/usr/bin/python3 /srv/datalogger_mmr/serial
+ExecStart=/usr/bin/python3 /srv/datalogger_reg_fijo/serial
 
 # Restart every >2 seconds to avoid StartLimitInterval failure
 RestartSec=3
