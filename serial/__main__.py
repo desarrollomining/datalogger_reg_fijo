@@ -13,7 +13,7 @@ config:dict = json.load(f)
 
 # Global variables
 USB_SERIAL_SENSOR = config["SENSOR"]["PORT"]
-CALIBRATION_LEVEL_CURVE = config["SENSOR"]["LEVEL_CURVE"] # Lista con min and max voltage signal: [v_min, v_max]
+CALIBRATION_LEVEL_CURVE = config["SENSOR"]["LEVEL_CURVE"] 
 SERVER_IP = config["SERVER"]["IP"]
 SERVER_PORT = config["SERVER"]["PORT"]
 
@@ -37,7 +37,6 @@ if __name__ == "__main__":
                 serial.log(f"FIFO error: {e}")
                 time.sleep(1)
 
-
     def manual_input_loop(serial):
         serial.log("Manual serial input enabled")
         while True:
@@ -57,8 +56,7 @@ if __name__ == "__main__":
 
     while True:
         silence_period = time.time() - RX.last_timestamp
-        if int(silence_period) > 20:
+        if int(silence_period) > 30:
             RX.panic("Too much RX silence")
 
-        print("last_sensor_timestamp:", silence_period)
         time.sleep(1)
