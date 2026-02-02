@@ -1,0 +1,134 @@
+/* Grid principal: 6 columnas, 2 filas */
+.valvulas-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    padding: 20px;
+}
+
+/* Tarjeta de cada válvula */
+.valvula-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: left;
+}
+
+/* Título */
+.valvula-title {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Contenedor de botones */
+.valvula-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Botones base */
+.btn-valvula {
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-valvula:hover {
+    opacity: 0.85;
+}
+
+.btn-live {
+    background-color: #fd7e14;
+    color: white;
+}
+
+/* Colores por acción */
+.btn-on {
+    background-color: #198754;
+    color: white;
+}
+
+.btn-off {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-sets {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-setr {
+    background-color: #6c757d;
+    color: white;
+}
+
+.log-console {
+    margin: 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 12px;
+    height: 220px;
+    overflow-y: auto;
+
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.85rem;
+    color: #212529;
+
+    white-space: pre-wrap;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.top-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.top-actions .btn-valvula {
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 10px;
+}
+
+.page-header {
+    padding: 20px;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .valvulas-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .valvulas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 1.6rem;
+    }
+}

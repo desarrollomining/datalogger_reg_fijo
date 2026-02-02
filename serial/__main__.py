@@ -2,6 +2,7 @@ import time
 import json
 import sys
 import threading
+import os
 
 sys.path.append('/srv/datalogger_reg_fijo/')
 from serial_lib import SerialLib
@@ -26,16 +27,27 @@ if __name__ == "__main__":
 
     def fifo_input_loop(serial, fifo="/tmp/serial_cmd"):
         serial.log(f"Listening FIFO commands at {fifo}")
+
+        if not os.path.exists(fifo):
+            os.mkfifo(fifo, 0o600)
+
         while True:
             try:
                 with open(fifo, "r") as f:
-                    for line in f:
-                        cmd = line.strip()
-                        if cmd:
-                            serial.send_command(cmd + "\n")
+                    while True:
+                        line = f.readline()
+                        if line:
+                            cmd = line.strip()
+                            if cmd:
+                                serial.send_command(cmd + "\n")
+                        else:
+                            time.sleep(0.1)
             except Exception as e:
                 serial.log(f"FIFO error: {e}")
                 time.sleep(1)
+
+
+    threading.Thread(target=fifo_input_loop, args=(RX,), daemon=True).start()
 
     def manual_input_loop(serial):
         serial.log("Manual serial input enabled")
